@@ -7,6 +7,7 @@ import (
 	_ "image/gif"
 	"image/jpeg"
 	_ "image/png"
+	_ "golang.org/x/image/webp" // Import the WebP package
 	"io"
 )
 
@@ -28,7 +29,7 @@ func ImageScale(reader io.Reader, miW, miH int) ([]byte, error) {
 	var ratio float64                        // image w/h ratio
 
 	// get image dimension
-	m, _, err := image.Decode(reader2)
+	m, format, err := image.Decode(reader2)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +57,17 @@ func ImageScale(reader io.Reader, miW, miH int) ([]byte, error) {
 		}
 	}
 
-	return ImageResize(reader3, thmW, thmH)
+	// If the original format is GIF, return the original data
+	if format == "gif" {
+		// Return the original GIF data
+		return io.ReadAll(reader)
+	}
+
+	return ImageResize(reader3, thmW, thmH, format)
 }
 
 // ImageResize resize image to specific width, height
-func ImageResize(reader io.Reader, owidth int, oheight int) ([]byte, error) {
+func ImageResize(reader io.Reader, owidth int, oheight int, format string) ([]byte, error) {
 	m, _, err := image.Decode(reader)
 	if err != nil {
 		return nil, err
@@ -96,8 +103,16 @@ func ImageResize(reader io.Reader, owidth int, oheight int) ([]byte, error) {
 
 	var b bytes.Buffer
 	writer := bufio.NewWriter(&b)
-	opts := &jpeg.Options{Quality: 50}
-	jpeg.Encode(writer, newImg, opts)
+
+	// Encode jpeg
+		opts := &jpeg.Options{Quality: 50}
+		err = jpeg.Encode(writer, newImg, opts)
+
+	if err != nil {
+		return nil, err
+	}
+
+	writer.Flush() // Ensure all data is written to the buffer
 
 	return b.Bytes(), nil
 }

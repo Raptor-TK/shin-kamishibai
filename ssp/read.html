@@ -3,17 +3,19 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta
-			content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+			content="width=device-width, initial-scale=1.0, user-scalable=yes"
 			name="viewport"
 		/>
 		<meta content="yes" name="apple-mobile-web-app-capable" />
 		<meta content="black" name="apple-mobile-web-app-status-bar-style" />
 		<title>Kamishibai</title>
 		<style>
-
 			body {
 			  background-color: black;
 			  color: white;
+			  margin: 0;
+			  padding: 0;
+			  height: 100vh;
 			}
 			@media screen and (prefers-color-scheme: light) {
 			  body {
@@ -41,10 +43,16 @@
 				padding: 3px;
 				margin-right: 10px;
 			}
+
 			.div-img {
-				width: 99%;
-				margin-bottom: 0.5em;
+			  width: 100vw; /* Set the container width to 100% of viewport width */
+			  height: 100vh; /* Set the container height to 100% of viewport height */
+			  display: flex;
+			  justify-content: center;
+			  align-items: center;
+			  overflow: hidden; /* Hide any part of the image that exceeds the container */
 			}
+
 			.img-manga-fitwidth {
 				width: 100%;
 				min-width: 300px;
@@ -53,28 +61,20 @@
 				padding: 2px;
 			}
 
-			.img-manga {
-				display: block;
-				margin-left: auto;
-				margin-right: auto;
-				min-width: 600px;
-				min-height: 1200px;
-				max-height: 1200px;
-
-				border: 1px solid black;
-				padding: 2px;
-
+			.comic-image {
+			  max-width: 100%;
+			  max-height: 100%;
+			  object-fit: contain;
+			  transition: object-fit 0.3s ease;
 			}
 
-			.img-manga-fitwidth-height {
-				display: block;
-				margin-left: auto;
-				margin-right: auto;
-				min-width: 600px;
-				min-height: 950px;
-				max-height: 950px;
+			.img-manga {
+				max-width: 100vw;
+				max-height: 100vh;
+				object-fit: contain;
 				border: 1px solid black;
 				padding: 2px;
+				transition: all 0.3s ease;
 			}
 
 			#row-top > div {
@@ -87,52 +87,43 @@
 	</head>
 	<body>
 		<div id="row-top" class="row">
-			<div id="div-go-browse"></div>
-			<div id="div-button-navs-1"></div>
-			<div id="div-book-details">
-				<div>
-					Author: <span id="span-book-author">{{ .Book.Author }}</span>
-				</div>
-				<div>
-					Title: <span id="span-book-title">{{ .Book.Title }}</span>
-				</div>
-				<div>
-					Number: <span id="span-book-number">{{ .Book.Number }}</span>
-				</div>
-				<div>
-					Page: <span id="span-book-page">{{ .Book.Page }}</span> / <span id="span-book-pages">{{ .Book.Pages }}</span>
-				</div>
-			</div>
-			<div id="div-toggle-fullscreen"></div>
-			<div>
-				<a class="a-link-page" href="/browse.html?dir={{ .Dir }}">Browse</a>
-			</div>
+			<button id="browse-btn">Browse</button>
+			<button id="fullscreen-btn">Full Screen</button>
 			{{ if eq .Book.Fav 0 }}
-			<div>
-				<a class="a-link-page" href="/read.html?fav=1&book={{ .Book.ID }}&page={{ .Book.Page }}">Fav</a>
-			</div>
+			<button id="fav-btn">Fav</button>
 			{{ else }}
-			<div>
-				<a class="a-link-page" href="/read.html?fav=0&book={{ .Book.ID }}&page={{ .Book.Page }}">Unfav</a>
-			</div>
+			<button id="unfav-btn">Unfav</button>
 			{{ end }}
-<!-- 
-<a href="readwidth.html?book={{ .Book.ID }}&page={{ .Book.Page }}">Toggle Width</a>
--->
-
-			<button onclick="
-document.getElementById('img-1').className = 'img-manga-fitwidth'
-">Full Width</button>
-			<button onclick="
-document.getElementById('img-1').className = 'img-manga'
-">Normal Width</button>
-			<button onclick="
-document.getElementById('img-1').className = 'img-manga-fitwidth-height'
-">Fit Height</button>
-
-
+			<button id="slideshow-btn">Start Slideshow</button>
+			<select id="delay-dropdown">
+			    <option value="1000">1 second</option>
+			    <option value="2000" selected>2 seconds</option>
+			    <option value="3000">3 seconds</option>
+			    <option value="4000">4 seconds</option>
+			    <option value="5000">5 seconds</option>
+			    <option value="6000">6 seconds</option>
+			    <option value="7000">7 seconds</option>
+			    <option value="8000">8 seconds</option>
+			    <option value="9000">9 seconds</option>
+			    <option value="10000">10 seconds</option>
+			    <option value="11000">11 seconds</option>
+			    <option value="12000">12 seconds</option>
+			    <option value="13000">13 seconds</option>
+			    <option value="14000">14 seconds</option>
+			    <option value="15000">15 seconds</option>
+			    <option value="16000">16 seconds</option>
+			    <option value="17000">17 seconds</option>
+			    <option value="18000">18 seconds</option>
+			    <option value="19000">19 seconds</option>
+			    <option value="20000">20 seconds</option>
+			</select>
 		</div>
 		<div class="row">
+			Author: <span id="span-book-author">{{ .Book.Author }}</span><br>
+			Title: <span id="span-book-title">{{ .Book.Title }}</span><br>
+			Number: <span id="span-book-number">{{ .Book.Number }}</span><br>
+			Page: <span id="span-book-page">{{ .Book.Page }}</span> / <span id="span-book-pages">{{ .Book.Pages }}</span><br>
+			<p>
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book -5 }}">-5</a>
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book 5 }}">+5</a>
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book -10 }}">-10</a>
@@ -141,6 +132,7 @@ document.getElementById('img-1').className = 'img-manga-fitwidth-height'
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book 25 }}">+25</a>
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book -50 }}">-50</a>
 			<a class="a-link-page" href="/read.html?book={{ .Book.ID }}&page={{ readPageN .Book 50 }}">+50</a>
+			<p>
 		</div>
 		<div class="row">
 			<noscript>
@@ -168,18 +160,30 @@ document.getElementById('img-1').className = 'img-manga-fitwidth-height'
 			var bookID = "{{.Book.ID}}";
 			var page = {{.Book.Page}};
 			var maxPage = {{.Book.Pages}};
+			var slideshowBtn = document.getElementById('slideshow-btn');
+			var fullscreenBtn = document.getElementById('fullscreen-btn');
+			var browseBtn = document.getElementById('browse-btn');
+			var favBtn = document.getElementById('fav-btn');
+			var unfavBtn = document.getElementById('unfav-btn');
 
-			// enable full screen for supported device
-			if (document.documentElement.requestFullscreen) {
-				var el = document.getElementById("div-toggle-fullscreen");
-				el.innerHTML = "<a href='#'>Full Screen</a>";
-				el.onclick = toggleFullScreen;
-			}
-			function toggleFullScreen() {
-				if (!document.fullscreenElement) {
-					document.documentElement.requestFullscreen();
-				} else if (document.exitFullscreen) {
-					document.exitFullscreen();
+
+			var isSlideShowOn = false; // Static variable to track slideshow mode
+			var delayDropdown = document.getElementById('delay-dropdown');
+			var delay = parseInt(delayDropdown.value);
+			var intervalId;
+			var isImageLoading = false;
+
+			function getViewportSize() {
+				if (window.visualViewport) {
+					return {
+						width: window.visualViewport.width,
+						height: window.visualViewport.height
+					};
+				} else {
+					return {
+						width: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+						height: window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+					};
 				}
 			}
 
@@ -217,7 +221,91 @@ document.getElementById('img-1').className = 'img-manga-fitwidth-height'
 				}
 
 				el_sbp.innerText = page;
+				
+				// Resize image after loading new page
+				this.onload = document.getElementById("a-img-manga").focus();
 			};
+
+			// Enable full screen
+			fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+			// Navigate to browse page
+			browseBtn.addEventListener('click', () => {
+				window.location = "/browse.html?dir={{ .Dir }}";
+			});
+
+			function toggleFullScreen() {
+				if (!document.fullscreenElement) {
+					document.documentElement.requestFullscreen();
+				} else if (document.exitFullscreen) {
+					document.exitFullscreen();
+				}
+			}
+
+			// Fav/Unfav book
+			if (favBtn) {
+				favBtn.addEventListener('click', () => {
+				  window.location = "/read.html?fav=1&book={{ .Book.ID }}&page={{ .Book.Page }}";
+				});
+			}
+
+			if (unfavBtn) {
+				unfavBtn.addEventListener('click', () => {
+				  window.location = "/read.html?fav=0&book={{ .Book.ID }}&page={{ .Book.Page }}";
+				});
+			}
+
+			slideshowBtn.addEventListener('click', () => {
+			  if (slideshowBtn.textContent === 'Start Slideshow') {
+			    isSlideShowOn = true;
+			    intervalId = setInterval(() => {
+			      if (!isImageLoading) {
+				isImageLoading = true;
+				page = page + 1;
+				if (page > maxPage) {
+				  page = 1;
+				}
+				el_img.src = "/api/read/" + bookID + "/" + page;
+				el_sbp.innerText = page;
+			      }
+			    }, delay);
+			    slideshowBtn.textContent = 'Stop Slideshow';
+			  } else {
+			    isSlideShowOn = false;
+			    clearInterval(intervalId);
+			    window.location = "read.html?book=" + bookID + "&page=" + page;
+			    slideshowBtn.textContent = 'Start Slideshow';
+			  }
+			});
+
+			el_img.addEventListener('load', () => {
+			  isImageLoading = false;
+			});
+
+			el_img.addEventListener('error', () => {
+			  isImageLoading = false;
+			});
+
+			window.addEventListener('load', () => {
+			  el_img.focus();
+			  if (isSlideShowOn) {
+			    intervalId = setInterval(() => {
+			      if (!isImageLoading) {
+				isImageLoading = true;
+				page = page + 1;
+				if (page > maxPage) {
+				  page = 1;
+				}
+				el_img.src = "/api/read/" + bookID + "/" + page;
+				el_sbp.innerText = page;
+			      }
+			    }, delay);
+			  }
+			});
+
+			delayDropdown.addEventListener('change', function() {
+			    delay = parseInt(delayDropdown.value); // Convert selected value to integer
+			});
 		</script>
 	</body>
 </html>

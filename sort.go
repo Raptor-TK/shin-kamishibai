@@ -241,7 +241,7 @@ func fibsPartition(arr []*FileInfoBasic, byType string, low, high int) int {
 			b := pivot.Rtime
 
 			// natural compare
-			if a < b { // oldest read first
+			if a > b { // recent read first
 				i++
 				arr[i], arr[j] = arr[j], arr[i]
 			}
